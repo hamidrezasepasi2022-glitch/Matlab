@@ -1,0 +1,68 @@
+%%client side 
+x = imread("lena.jpg");
+x = im2uint8(x);
+[m  n] = size(x);
+
+
+connectionsuccess = 0;
+
+while connectionsuccess == 0
+    try
+        client = tcpclient("localhost",30000);
+        connectionsuccess = 1;
+    catch
+        disp("connection didn't establish");
+
+    end
+end
+
+client.ByteOrder = "Big-endian";
+
+send = x(:)';
+
+write(client,m,"double");
+write(client,n,"double");
+write(client,send,"uint8");
+
+%%server side 
+
+server = tcpserver("0.0.0.0",30000);
+
+if server.Connected
+    disp("server connected successfuly ");
+end
+
+
+server.ByteOrder = "Big-endian";
+
+server.ConnectionChangedFcn = @manage;
+
+%%manage function
+function manage(server,~)
+
+if server.Connected
+    a = read(server,1,"double");
+    b = read(server,1,"double");
+    disp("dimension of the data matrix is "+ num2str(a) + num2str(b));
+
+end
+
+while server.NumBytesAvailable < 1
+    pause(0.1);
+end
+data = [];
+tot = a*b;
+i = 1;
+while i <= tot
+    data(1,i) = read(server,1,"uint8");
+    i = i + 1;
+ 
+end
+
+data = reshape(data,a,b);
+imshow(data);
+
+negative = 255 - data;
+
+imshow(negative);
+
