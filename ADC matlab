@@ -1,0 +1,45 @@
+v0 = 2;
+f0 = 20;
+phi0 = 0;
+tw = 100;
+N = 500;
+t = linspace(0,tw,N);
+fs = 50;
+
+
+noise = rand(1,N);
+wave = v0*cos(2*pi*f0*t + phi0);
+wavenoise = wave + 6*noise; 
+
+plot(t,wave);
+xlabel("Time","Color","yellow");
+ylabel("Original Wave","Color","yellow");
+figure
+plot(t,wavenoise);
+xlabel("Time","Color","red");
+ylabel("Signal With Noise","Color","red");
+
+n = 1:5000;
+tsampled = n/fs;
+
+sampled = interp1(t,wavenoise,tsampled);
+figure
+plot(tsampled,sampled);
+xlabel("Time");
+ylabel("Sampled Wave");
+
+%proceed to ADC and quantization
+
+vmax = max(sampled);
+vmin = min(sampled);
+L = 2^3;
+delta = (vmax + abs(vmin))/(L-1);
+
+quantized = delta*round(sampled/delta);
+figure
+plot(tsampled,quantized);
+xlabel("Time","Color","blue");
+ylabel("Quantized wave","Color","blue");
+
+
+disp([vmin vmax]);
