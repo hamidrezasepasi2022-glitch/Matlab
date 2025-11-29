@@ -1,0 +1,337 @@
+js 
+/*using stack dsa as collector of the cotents numbers and operators*/
+class stack{
+    constructor(capa){
+        this.capa = capa;
+        this.data = new Array(capa);        
+        this.capacity = capa;
+        this.counter = 0;
+    }
+
+    push(element){
+        if( this.counter < this.data.length ){
+        this.data[this.counter] = element;
+        this.counter++;
+        }else{
+            let newdata = new Array(this.capacity*2);
+            newdata = this.data.slice(0,this.capacity);
+            this.capacity = newdata.length;
+            newdata[this.counter] = element;
+            this.data = newdata; 
+        }}
+
+    pop(){
+        if(this.counter === 0){return null;
+
+        }let tempdata = this.data[this.counter - 1];
+            this.data[this.counter - 1] = null;    
+            this.counter --;
+            
+        return tempdata;}
+
+    
+
+    isEmpty(){
+        return this.counter === 0;
+    }
+
+
+    }
+    
+
+
+
+
+
+
+
+
+let header = document.getElementById("header-box");
+const num1 = null;
+const num2 = null;
+let one = document.getElementById("but1").onclick = function(){
+    header.textContent = header.textContent + "1"
+};
+let zero = document.getElementById("but0").onclick = function(){
+    header.textContent = header.textContent + "0"
+};
+let two = document.getElementById("but2").onclick = function(){
+    header.textContent = header.textContent + "2"
+};
+let three = document.getElementById("but3").onclick = function(){
+    header.textContent = header.textContent + "3"
+};
+let four = document.getElementById("but4").onclick = function(){
+    header.textContent = header.textContent + "4"
+};
+let five = document.getElementById("but5").onclick = function(){
+    header.textContent = header.textContent + "5"
+};
+let six = document.getElementById("but6").onclick = function(){
+    header.textContent = header.textContent + "6"
+};
+let seven = document.getElementById("but7").onclick = function(){
+    header.textContent = header.textContent + "7"
+};
+let eight = document.getElementById("but8").onclick = function(){
+    header.textContent = header.textContent + "8"
+};
+let nine = document.getElementById("but9").onclick = function(){
+    header.textContent = header.textContent + "9"
+};
+let add = document.getElementById("add").onclick = function(){
+    header.textContent = header.textContent + "+"
+};
+let sub = document.getElementById("sub").onclick = function(){
+    header.textContent = header.textContent + "-"
+};
+let mul = document.getElementById("mul").onclick = function(){
+    header.textContent = header.textContent + "*"
+};
+let divis = document.getElementById("division").onclick = function(){
+    header.textContent = header.textContent + "/"
+};
+let clr = document.getElementById("clear").onclick = function(){
+    header.textContent = null;
+    document.getElementById("h3").textContent = null;
+}
+
+let ops = ["+","-","/","*"];
+
+
+function operator(a,b,c){
+    switch(b){
+        case"+":
+        return Number(a) + Number(c);
+    case "-":
+        return Number(a) - Number(c);
+    case "/":
+        return Number(a) / Number(c);
+    case "*":
+        return Number(a) * Number(c);
+            
+    }
+}
+let equ = document.getElementById("eq").onclick = function(){
+    let numset = new stack(10);
+    let operset = new stack(10);
+
+    let x = header.textContent;
+    let count = 0;
+    let oper = null;
+    for(let i = 0 ; i < x.length;i++){
+        if(ops.includes(String(x[i]))){operset.push(x[i]);
+            numset.push(x.slice(count,i));
+            count = i + 1 ;
+            }
+        }
+
+    if(count === 0){document.getElementById("h3").textContent = "Invalid Operation!!!!!"
+
+    }else{
+        
+        numset.push(x.slice(count));
+
+        // let result = 0;
+        
+        while(!operset.isEmpty()){
+           
+        let right = Number(numset.pop());
+        let op = operset.pop();
+        let left = Number(numset.pop());
+        let result = operator(left, op, right);
+        numset.push(result);
+           
+            // let a = numset.pop();
+            // let b = operset.pop();
+            // let c = numset.pop();
+            // result += operator(a,b,c);
+        }
+        header.textContent = numset.pop();
+        
+    }
+    
+    
+        }
+
+
+
+
+/*i = 0;
+while(i < ar.length){
+     
+
+}*/
+
+HTML 
+
+  <!DOCTYPE html>
+<html lang = "eng">
+<link rel = "stylesheet" href = "maindesign.css">
+<head>
+
+<title>Sample Website</title>
+
+</head>
+
+<body>
+<h1 id = "mainh1">Welcome to my sample webpage</h1>
+<p id = "mainp">here you would see couple of the games and sample projects designed by me </p>
+<a id = "calclink" href = "index.html">CLICK HERE FOR CALCULATOR</a>
+
+
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html>
+
+  <!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Calculator Sample</title>
+<link rel="stylesheet" href="design.css">
+<script src = "function.js" defer></script>
+
+</head>
+
+<body id = "bd">
+<h1 id = "header1">Calculator</h1>
+<h2 id = "header-box"></h2>
+
+<div id = "buttons">
+
+<button id = "but1">1</button>
+<button id = "but2">2</button>
+<button id = "but3">3</button>
+<button id = "but4">4</button>
+<button id = "but5">5</button>
+<button id = "but6">6</button>
+<button id = "but7">7</button>
+<button id = "but8">8</button>
+<button id = "but9">9</button>
+<button id = "but0">0</button>
+<button id = "add">+</button>
+<button id = "sub">-</button>
+<button id = "division">/</button>
+<button id = "mul">*</button>
+<button id = 'eq'>=</button>
+<button id = "clear">clear</button>
+
+
+
+</div>
+<h3 id = "h3"></h3>
+
+</body>
+
+</html>
+
+
+CSS
+#header-box {
+      direction: ltr;
+      border: 2px solid #444;
+      border-radius: 6px;
+      background: #eaeaea;
+      padding: 10px;
+      text-align: left;
+      width : 200px;
+      height : 80px;
+      align-items: center;
+      justify-content: center;
+      width: 250px;
+      margin: 20px auto;   /* auto left & right margins → center horizontally */
+      border: 2px solid black;
+      text-align: left;
+      padding: 10px;
+    background: #faf2f2ec;
+
+    }
+
+#buttons {
+  display: flex;          /* turn on flexbox */
+  justify-content: center;/* center items horizontally */
+  align-items: center;    /* center items vertically (inside the row) */
+  flex-wrap: wrap;        /* allow buttons to wrap to next line */
+  gap: 7px;              /* spacing between buttons */
+  display: grid;
+  grid-template-columns: repeat(3,60px); /* 4 buttons per row */
+  grid-gap: 12px; /* space between buttons */
+  justify-content: center; /* center horizontally */
+  margin-top: 25px;
+  border-radius: 5px;
+  color :red ;  
+  /* transform: translate(10px); */
+  /* width : 200px;
+  height: 150px; */
+}
+
+body {
+  background-color: rgb(209, 201, 193);
+
+
+
+}
+
+#clear{
+  width : 203px;
+  height:50px;
+  background-color: blanchedalmond;
+}
+
+#header1{
+
+  align-items: center;
+  color: rebeccapurple;
+}
+
+#buttons button:not(#clear) {
+
+  width : 60px;
+  height : 32px;
+
+}
+
+  h1 {
+    color :rgb(63, 63, 101);
+    text-align: center; /*in order to set content at middle*/
+    /* position: relative; */
+
+}
+
+p {
+  color : red;
+  text-align: center;
+}
+
+body{
+    background-color:beige;  
+
+}
+#calclink{
+    text-align: center;
+    color :black;
+    position: relative;
+    left: 490px;
+    /* align-content: center;
+    align-self: center;
+    align-items:center ; */
+    
+}
+  
