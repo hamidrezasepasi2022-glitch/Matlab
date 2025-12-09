@@ -1,0 +1,335 @@
+%% activating server 
+try 
+    server = tcpserver("0.0.0.0",30000);
+catch
+    disp("server connection failed");
+end
+
+server.ConnectionChangedFcn = @pshaz;
+server.Timeout = 20;
+
+%%end of server part 
+
+
+function pshaz(server,~)
+
+%%creating array of library file names 
+names = [
+"bagpipe.wav",
+"ballad.wav",
+"bartok.wav",
+"beat.wav",
+"gravity2.wav",
+"guitar.wav",
+"hendrix.wav",
+"ipanema.wav",
+"jazz.wav",
+"jazz1.wav",
+"led.wav",
+"loreena.wav",
+"madradeus.wav",
+"moanin.wav",
+"narch.wav",
+"ncherry.wav",
+"nearhou.wav",
+"newTest3_shorter.wav",
+"newTest4_shorter.wav",
+"newTest5_noiser.wav",
+"newTest6_noiser.wav",
+"noisy_shazametest.wav",
+"opera.wav",
+"opera1.wav",
+"russo.wav",
+"tony.wav",
+"u2.wav",
+"unpoco.wav",
+"vlobos.wav",
+"winds.wav"];
+
+%%getting the dimension of transmited array
+
+fsample = read(server,1,"double");
+a = read(server,1,"double");
+b = read(server,1,"double");
+
+
+
+%%reading proper amount of double information
+data = read(server,(server.NumBytesAvailable/8),"double");
+
+
+results = [];
+starts = [];
+
+
+
+
+
+
+data = data(:)';
+
+%%receiving spectrogram information of the transsmited input
+[s,f,t,p] = spectrogram(data,1024,768,1024,fsample);
+
+z = 0;
+r = 0;
+i = 1;
+
+%%storing the results of comparisons 
+while i <= 30
+    
+    [z,r] = audioread(names(i));
+    [out1,out2,out3] = spectrogram(z,1024,768,1024,r);
+    ret = comparison(s,out1);
+    results(i) = ret(1); 
+    starts(i) = out3(ret(2));
+    
+    i = i+1;
+end
+
+
+
+res = find(results == min(results));
+
+startingsecond = starts(res);
+send = names(res);
+
+
+
+write(server,startingsecond,"int8");
+
+writeline(server,send);
+
+end
+
+function output =  comparison(s1,s2)
+
+
+[size1_1,size1_2] = size(s1);
+[size2_1,size2_2] = size(s2);
+
+%%trying to get minimum length and width for array in order to compare them
+sif1 = min(size1_1,size2_1);
+sif2 = min(size1_2,size2_2);
+
+
+
+search_res = [];
+indexes = [];
+
+%%if destination audio is bigger than test then gonna be compared with
+%%sufficient amount of windows with the size of test file
+if size1_2 < size2_2
+    wind = size1_2;    
+   
+    s1 = s1(1:sif1,1:size1_2);
+    s2 = s2(1:sif1,1:size2_2);
+    s1 = abs(s1);
+    s2 = abs(s2);
+    
+    j = 1;
+    i = 1;
+    nsize = floor(size2_2/wind);%%number of iterations 
+    while (i+wind -1) <= size2_2
+        search_res(j) = sum(sum((s1 - s2(:,i:(i+wind - 1))).^2));
+        indexes(j) = i;
+
+        i = i + wind;
+        j = j+1;
+    
+    end
+    %%returning the minimum value score (highest similarity)
+    low = min(search_res);
+    in = find(search_res == low);
+    start = indexes(in);
+    output = [low,start];
+
+
+
+else
+    s1 = s1(1:sif1,1:sif2);
+    s2 = s2(1:sif1,1:sif2);
+    s1 = abs(s1);
+    s2 = abs(s2);
+ 
+ 
+ 
+    gout = sum(sum((s1 - s2).^2));
+    output = [gout,1];
+end
+end
+
+%% activating server 
+try 
+    server = tcpserver("0.0.0.0",30000);
+catch
+    disp("server connection failed");
+end
+
+server.ConnectionChangedFcn = @pshaz;
+server.Timeout = 20;
+%%shazam assignment functions only when both test audios and library are
+%%located in the same directory 
+
+%%extracting the answer from input 
+
+inp = input("INSERT YOUR AUDIO ADDRESS:  ","s");
+
+charinp = char(inp);
+ind = find(charinp == '_');
+
+
+answer = string(charinp(ind(1)+1:end));
+
+disp(inp + " received");
+
+%%extraction of input matrix and sampling frequency of input file 
+[y , fs] = audioread(inp);
+
+%%attempting to make client
+try 
+    client = tcpclient("localhost",30000);
+catch
+    disp("failed to create client!!!!!");
+end
+
+[m , n ] = size(y);
+
+%%reshaping input matrix for tcp transmission
+y = y(:)';
+
+write(client,fs,"double");
+write(client,m,"double");
+write(client,n,"double");
+
+write(client,y,"double");
+
+
+pause(2);
+
+%%reading offset of the corresponding file and related file name from
+%%client buffer 
+if client.NumBytesAvailable ~= 0
+    try 
+        starting = read(client,1,"uint8");
+        received = readline(client);
+    catch
+          disp("failed to receive the results ");
+
+    end
+end
+
+
+disp("Your music matches with : " + received);
+disp("starting from the second : " + num2str(starting));
+
+
+%%examining validity of the answer 
+if received == answer
+    validity = "true";
+    [mat,fre] = audioread(received);
+    
+    mat = mat(:)';
+elseif received ~= answer
+    validity = "wrong";
+end
+
+disp("the result is considered as : " + validity);
+
+%%calculating the SNR in db scale in the case of correct answer
+if received == answer
+    SNR = 10*log10(sum((mat.^2)/length(mat))/(sum(y.^2)/length(y)));
+    disp("Your signal to noise ratio(SNR) is : " + num2str(SNR)+" db");
+end
+
+
+function pshaz(server,~)
+
+%%creating array of library file names 
+names = [
+"bagpipe.wav",
+"ballad.wav",
+"bartok.wav",
+"beat.wav",
+"gravity2.wav",
+"guitar.wav",
+"hendrix.wav",
+"ipanema.wav",
+"jazz.wav",
+"jazz1.wav",
+"led.wav",
+"loreena.wav",
+"madradeus.wav",
+"moanin.wav",
+"narch.wav",
+"ncherry.wav",
+"nearhou.wav",
+"newTest3_shorter.wav",
+"newTest4_shorter.wav",
+"newTest5_noiser.wav",
+"newTest6_noiser.wav",
+"noisy_shazametest.wav",
+"opera.wav",
+"opera1.wav",
+"russo.wav",
+"tony.wav",
+"u2.wav",
+"unpoco.wav",
+"vlobos.wav",
+"winds.wav"];
+
+%%getting the dimension of transmited array
+
+fsample = read(server,1,"double");
+a = read(server,1,"double");
+b = read(server,1,"double");
+
+
+
+%%reading proper amount of double information
+data = read(server,(server.NumBytesAvailable/8),"double");
+
+
+results = [];
+starts = [];
+
+
+
+
+
+
+data = data(:)';
+
+%%receiving spectrogram information of the transsmited input
+[s,f,t,p] = spectrogram(data,1024,768,1024,fsample);
+
+z = 0;
+r = 0;
+i = 1;
+
+%%storing the results of comparisons 
+while i <= 30
+    
+    [z,r] = audioread(names(i));
+    [out1,out2,out3] = spectrogram(z,1024,768,1024,r);
+    ret = comparison(s,out1);
+    results(i) = ret(1); 
+    starts(i) = out3(ret(2));
+    
+    i = i+1;
+end
+
+
+
+res = find(results == min(results));
+
+startingsecond = starts(res);
+send = names(res);
+
+
+
+write(server,startingsecond,"int8");
+
+writeline(server,send);
+
+end
